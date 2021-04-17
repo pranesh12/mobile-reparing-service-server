@@ -20,9 +20,11 @@ const uri =
   "mongodb+srv://mobile:GdAaLrexJG9OulH1@cluster0.kjnut.mongodb.net/mobileService?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect((err) => {
+  //
   const serviceCollection = client.db("mobileService").collection("services");
   const admincollection = client.db("mobileService").collection("admins");
   const reviewCollection = client.db("mobileService").collection("reviews");
+  const PaymnetInfoCollection = client.db("mobileService").collection("payments");
 
   app.post("/addService", (req, res) => {
     const title = req.body.title;
@@ -77,6 +79,20 @@ client.connect((err) => {
   app.get("/services", (req, res) => {
     serviceCollection.find({}).toArray((err, documents) => {
       res.send(documents);
+    });
+  });
+
+  //savePaymnet
+  app.post("/addPayment", (req, res) => {
+    console.log(req.body);
+    const name = req.body.name;
+    const email = req.body.email;
+    const title = req.body.title;
+    const price = req.body.price;
+    const card = req.body.card;
+
+    PaymnetInfoCollection.insertOne({ name, email, title, price, card }).then((result) => {
+      res.send(result.insertOne > 0);
     });
   });
 
