@@ -5,6 +5,7 @@ const multer = require("multer");
 const cors = require("cors");
 const fs = require("fs-extra");
 const app = express();
+require("dotenv").config();
 
 app.use(express.json());
 app.use(cors());
@@ -16,8 +17,9 @@ var upload = multer({
   dest: UPLOADS_FOLDER,
 });
 
-const uri =
-  "mongodb+srv://mobile:GdAaLrexJG9OulH1@cluster0.kjnut.mongodb.net/mobileService?retryWrites=true&w=majority";
+console.log();
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kjnut.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect((err) => {
   //
@@ -31,25 +33,17 @@ client.connect((err) => {
     const description = req.body.description;
     const price = req.body.price;
     const file = req.files.file;
-    const filePath = `${__dirname}/upload/${file.name}`;
+    let newImg = file.data;
+    const encImg = newImg.toString("base64");
 
-    file.mv(filePath, (err) => {
-      if (err) {
-        console.log(err);
-        res.send(500).send({ msg: "failed to upload image on server" });
-      }
-      let newImg = fs.readFileSync(filePath);
-      const encImg = newImg.toString("base64");
+    var image = {
+      contentType: file.mimetype,
+      size: file.size,
+      img: Buffer.from(encImg, "base64"),
+    };
 
-      var image = {
-        contentType: file.mimetype,
-        size: file.size,
-        img: Buffer.from(encImg, "base64"),
-      };
-
-      serviceCollection.insertOne({ title, description, price, image }).then((result) => {
-        res.send(result.insertedCount > 0);
-      });
+    serviceCollection.insertOne({ title, description, price, image }).then((result) => {
+      res.send(result.insertedCount > 0);
     });
   });
 
@@ -132,6 +126,6 @@ client.connect((err) => {
 
 //adding Admin
 
-app.listen(5000, () => {
+app.listen(process.env.PORT || 5000, () => {
   console.log("App is runnig on port 5000");
 });
