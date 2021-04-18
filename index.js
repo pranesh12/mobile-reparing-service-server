@@ -116,6 +116,16 @@ client.connect((err) => {
       }
     });
   });
+  //Admin
+  app.get("/isAdmin", (req, res) => {
+    const email = req.query.email;
+    admincollection.find({ email: email }).toArray((err, admins) => {
+      if (err) throw err;
+      if (admins.length > 0) {
+        res.send(true);
+      }
+    });
+  });
 
   console.log("database connected");
 });
