@@ -84,7 +84,6 @@ client.connect((err) => {
 
   //savePaymnet
   app.post("/addPayment", (req, res) => {
-    console.log(req.body);
     const name = req.body.name;
     const email = req.body.email;
     const title = req.body.title;
@@ -93,6 +92,28 @@ client.connect((err) => {
 
     PaymnetInfoCollection.insertOne({ name, email, title, price, card }).then((result) => {
       res.send(result.insertOne > 0);
+    });
+  });
+
+  //Find Paymnet or Booking List for specefic email
+  app.get("/bookingList", (req, res) => {
+    const email = req.query.email;
+    PaymnetInfoCollection.find({ email: email }).toArray((err, documents) => {
+      res.send(documents);
+    });
+  });
+
+  //Admin Payment
+  app.get("/AdminOrderList", (req, res) => {
+    const email = req.query.email;
+    admincollection.find({ email: email }).toArray((err, admins) => {
+      if (err) throw err;
+      if (admins.length > 0) {
+        PaymnetInfoCollection.find({}).toArray((err, documents) => {
+          if (err) throw err;
+          res.send(documents);
+        });
+      }
     });
   });
 
